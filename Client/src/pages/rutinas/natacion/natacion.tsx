@@ -174,27 +174,37 @@ export function Natacion() {
         }
     };
 
-    const deleteRoutines = (id:number, routineIndex:number) => {
-        const uptadtedRoutines = [...editingData.routine]
-        uptadtedRoutines.splice(routineIndex,1)
-
+    const deleteRoutines = (id: number, routineIndex: number) => {
+        // Verifica si hay rutinas para eliminar
+        if (editingData.routine.length === 0) {
+            console.log("No hay rutinas para eliminar.");
+            return;
+        }
+    
+        // Crea una copia de las rutinas y elimina la rutina en el índice especificado
+        const updatedRoutines = [...editingData.routine];
+        updatedRoutines.splice(routineIndex, 1);
+    
+        // Actualiza el estado de edición
         const updatedData = {
             ...editingData,
-            routine:uptadtedRoutines
-        }
-
-        setEditingData(updatedData)
-
+            routine: updatedRoutines,
+        };
+        setEditingData(updatedData);
+    
+        // Envía la actualización al backend
         axios.patch(`${serverFront}/api/swin/${id}`, {
-            // ...updatedData, // Envía todos los campos, no solo las rutinas
-            // piletas: Number(updatedData.piletas),
-            // meters: Number(updatedData.meters),
+            ...updatedData, // Envía todos los campos
+            piletas: Number(updatedData.piletas),
+            meters: Number(updatedData.meters),
         })
         .then(response => {
+            // Actualiza el estado `natacion` con la respuesta del backend
             setNatacion(natacion.map(swin => swin._id === id ? response.data : swin));
         })
         .catch(err => console.log(err));
-    }
+    };
+
 
     const cancelEditingRoutine = () => {
         setEditingRoutineIndex(null)
@@ -242,8 +252,8 @@ export function Natacion() {
             </div>
 
             <div className="boton-inputs">
-                <button onClick={addSwin}>Agregar</button>
-                <button onClick={cleanInputs}>Limpiar</button>
+                <button className="add" onClick={addSwin}>Agregar</button>
+                <button className="clean" onClick={cleanInputs}>Limpiar</button>
             </div>
 
             {error && <div className="error">{error}</div>}
@@ -277,68 +287,87 @@ export function Natacion() {
                                 </button>
                             )}
 
-                        <button onClick={() => deleteSwin(e._id)} onMouseEnter={() => open('eliminar')} onMouseLeave={close}> 
+                        <button onClick={() => deleteSwin(e._id)} onMouseEnter={() => open('eliminar')} onMouseLeave={close} className='delete'> 
                             <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
                                 <DeleteIcon/> 
                             </Tooltip>
                         </button>
                     </div>
                    
-                    <div className="title">
-                        <h3>Dia {editingId === e._id ? <input value={editingData.day} onChange={(e) => setEditingData({...editingData, day: e.target.value})} /> : e.day}  </h3>
-                        <h4> {editingId === e._id ? <input value={editingData.title} onChange={(e) => setEditingData({...editingData, title: e.target.value})} /> : e.title}</h4>
-                    </div>
+                   <div className="container-routine">
 
-
-
-                    <div className='routine'>
-
-                    <button className='button-plus' onMouseEnter={() => open('agregar más')} onMouseLeave={close} onClick={() => handleAddRoutine(e._id)}> 
-                        <Tooltip title={active === 'agregar más' ? "Agregar Más" : " "}>
-                            <AddCircleOutlineIcon/> 
-                        </Tooltip>
-                    </button>
-                    {addNewRoutine === e._id && (
-                        <div className="new-routine-input">
-                            <input 
-                                type="text" 
-                                placeholder='Ingresar nueva rutina' 
-                                value={newRoutine[e._id] || ""} 
-                                onChange={(event) => setNewRoutine({ ...newRoutine, [e._id]: event.target.value })} 
-                            />
-                            <button onClick={() => addRoutine(e._id)}> 
-                                <AddIcon/> 
-                            </button>
+                        <div className="title">
+                            <h3>Dia {editingId === e._id ? <input value={editingData.day} onChange={(e) => setEditingData({...editingData, day: e.target.value})} /> : e.day}  </h3>
+                            <h4> {editingId === e._id ? <input value={editingData.title} onChange={(e) => setEditingData({...editingData, title: e.target.value})} /> : e.title}</h4>
                         </div>
-                    )}
 
-                        <h4>Rutina</h4>
-                        {e.routine.map((r, i) => (
-                            <div key={i}>
-                                {editingRoutineIndex === i ? (
-                                    <div>
-                                        <input
-                                            type="text"
-                                            value={editingRoutineValue}
-                                            onChange={(e) => setEditingRoutineValue(e.target.value)}
-                                        />
-                                         <button onClick={() => deleteRoutines(e._id, i)}>Eliminar</button>
-                                        <button onClick={() => saveEditedRoutine(e._id)}> <SaveIcon/></button>
-                                        <button onClick={cancelEditingRoutine}><CancelIcon/> </button>
-                                    </div>
-                                ) : (
-                                    <p onClick={() => editingRoutine(i, r)}>{r}</p>
-                                )}
+                        <div className='routine'>
+
+                        <button className='button-plus' onMouseEnter={() => open('agregar más')} onMouseLeave={close} onClick={() => handleAddRoutine(e._id)}> 
+                            <Tooltip title={active === 'agregar más' ? "Agregar Más" : " "}>
+                                <AddCircleOutlineIcon/> 
+                            </Tooltip>
+                        </button>
+
+                        {addNewRoutine === e._id && (
+                            <div className="new-routine-input">
+                                <input 
+                                    type="text" 
+                                    placeholder='Ingresar nueva rutina' 
+                                    value={newRoutine[e._id] || ""} 
+                                    onChange={(event) => setNewRoutine({ ...newRoutine, [e._id]: event.target.value })} 
+                                />
+                                <button onClick={() => addRoutine(e._id)} className='routine-plus'> 
+                                    <AddIcon/> 
+                                </button>
                             </div>
-                        ))}
-                    </div>
+                        )}
+
+                            <h4>Rutina</h4>
+                            {e.routine.map((r, i) => (
+                                <div key={i} className='routine-container'>
+                                    {editingRoutineIndex === i ? (
+                                        <div>
+                                            <input
+                                                type="text"
+                                                value={editingRoutineValue}
+                                                onChange={(e) => setEditingRoutineValue(e.target.value)}
+                                            />
+
+                                            <button className="check" onMouseEnter={() => open('guardar')} onMouseLeave={close} onClick={() => saveEditedRoutine(e._id)}>
+                                            <Tooltip title={active === 'guardar' ? "Guardar" : " "}>
+                                                    <SaveIcon/> 
+                                                </Tooltip> 
+                                            </button>
+
+                                            <button className="cancel" onClick={cancelEditingRoutine} onMouseEnter={() => open('cancelar')} onMouseLeave={close} >                     
+                                                <Tooltip title={active === 'cancelar' ? "Cancelar" : " "}>
+                                                    <CancelIcon/> 
+                                                </Tooltip>
+                                            </button>
+
+                                            <button onClick={() => deleteRoutines(e._id, i)}  onMouseEnter={() => open('eliminar')} onMouseLeave={close}  className='delete'> 
+                                                <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
+                                                    <DeleteIcon/> 
+                                                </Tooltip> 
+                                            </button>
+                                                        
+                                        </div>
+                                    ) : (
+                                        <p onClick={() => editingRoutine(i, r)}>{r}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="container-data">
+                            <p>Piletas totales: {editingId === e._id ? <input value={editingData.piletas} onChange={(e) => setEditingData({...editingData, piletas: e.target.value})} /> : e.piletas} </p>
+                            <p>Metros totales: {editingId === e._id ? <input value={editingData.meters} onChange={(e) => setEditingData({...editingData, meters: e.target.value})} /> : e.meters} mts </p>
+
+                            <p className='km'>Kilometros total: {kmTotal(e.piletas, e.meters)} Km</p>
+                        </div>
                                         
-                    <p>Piletas totales: {editingId === e._id ? <input value={editingData.piletas} onChange={(e) => setEditingData({...editingData, piletas: e.target.value})} /> : e.piletas} </p>
-                    <p>Metros totales: {editingId === e._id ? <input value={editingData.meters} onChange={(e) => setEditingData({...editingData, meters: e.target.value})} /> : e.meters} mts </p>
-
-                    <p>Kilometros total: {kmTotal(e.piletas, e.meters)} Km</p>
-
-
+                    </div>
                 </div>
 
                 
