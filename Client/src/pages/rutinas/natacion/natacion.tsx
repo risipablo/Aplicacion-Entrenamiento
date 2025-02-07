@@ -20,6 +20,7 @@ interface NatacionList {
 }
 
 const serverFront = 'http://localhost:3001'
+// const serverFront = 'https://aplicacion-entrenamiento.onrender.com'
 
 export function Natacion() {
 
@@ -74,35 +75,13 @@ export function Natacion() {
         }
     }
 
-    const addRoutine = (id: number) => {
-        const routineToAdd = newRoutine[id];
-        if (routineToAdd && routineToAdd.trim() !== "") {
-            axios.put(`${serverFront}/api/swin/${id}/add-routine`, { newRoutine: routineToAdd })
-                .then(response => {
-                    setNatacion(natacion.map(nat => 
-                        nat._id === id ? response.data : nat
-                    ));
-                    setNewRoutine({ ...newRoutine, [id]: "" }); // Limpia el input después de agregar
-                })
-                .catch(err => setError(err.message));
-        }
-    };
-
     const deleteSwin = (id: number) => {
         axios.delete(`${serverFront}/api/swin/${id}`)
-            .then(response => {
+            .then(() => {
                 const updatedNatacion = natacion.filter((natacio) => natacio._id !== id)
                 setNatacion(updatedNatacion)
             })
             .catch(err => console.log(err))
-    }
-
-    const cleanInputs = () => {
-        setDay("")
-        setMeters("")
-        setPiletas("")
-        setRoutine("")
-        setTitle("")
     }
 
     const editSwin = (swin: NatacionList) => {
@@ -116,6 +95,30 @@ export function Natacion() {
         })
     }
 
+    const saveSwin = (id: number) => {
+        axios.patch(`${serverFront}/api/swin/${id}`, {
+            ...editingData, // Envía todos los campos
+            piletas: Number(editingData.piletas),
+            meters: Number(editingData.meters),
+        })
+        .then(response => {
+            setNatacion(natacion.map(swin => swin._id === id ? response.data : swin));
+            cancelEdit();
+        })
+        .catch(err => console.log(err));
+    };
+
+
+    const cleanInputs = () => {
+        setDay("")
+        setMeters("")
+        setPiletas("")
+        setRoutine("")
+        setTitle("")
+    }
+
+
+
     const cancelEdit = () => {
         setEditingId(null)
         setEditingData({
@@ -128,17 +131,23 @@ export function Natacion() {
         cancelEditingRoutine()
     }
 
-    const saveSwin = (id: number) => {
-        axios.patch(`${serverFront}/api/swin/${id}`, {
-            ...editingData, // Envía todos los campos
-            piletas: Number(editingData.piletas),
-            meters: Number(editingData.meters),
-        })
-        .then(response => {
-            setNatacion(natacion.map(swin => swin._id === id ? response.data : swin));
-            cancelEdit();
-        })
-        .catch(err => console.log(err));
+   
+
+    // Agregar rutinas internas
+    const addRoutine = (id: number) => {
+        // Primero, verifica si la nueva rutina no está vacía.
+        const routineToAdd = newRoutine[id];
+        if (routineToAdd && routineToAdd.trim() !== "") {
+            axios.put(`${serverFront}/api/swin/${id}/add-routine`, { newRoutine: routineToAdd })
+                .then(response => {
+                    // actualizar el estado
+                    setNatacion(natacion.map(nat => 
+                        nat._id === id ? response.data : nat
+                    ));
+                    setNewRoutine({ ...newRoutine, [id]: "" }); // Limpia el input después de agregar
+                })
+                .catch(err => setError(err.message));
+        }
     };
 
     // funcion de comenzar editar rutinas internas
@@ -161,11 +170,7 @@ export function Natacion() {
             setEditingData(updatedData);
     
             // Envía la actualización al backend
-            axios.patch(`${serverFront}/api/swin/${id}`, {
-                // ...updatedData, // Envía todos los campos, no solo las rutinas
-                // piletas: Number(updatedData.piletas),
-                // meters: Number(updatedData.meters),
-            })
+            axios.patch(`${serverFront}/api/swin/${id}`, {})
             .then(response => {
                 setNatacion(natacion.map(swin => swin._id === id ? response.data : swin));
                 cancelEditingRoutine(); // Cancela la edición después de guardar
@@ -194,9 +199,7 @@ export function Natacion() {
     
         // Envía la actualización al backend
         axios.patch(`${serverFront}/api/swin/${id}`, {
-            ...updatedData, // Envía todos los campos
-            piletas: Number(updatedData.piletas),
-            meters: Number(updatedData.meters),
+            routine: updatedRoutines, // Envía solo la rutina actualizada
         })
         .then(response => {
             // Actualiza el estado `natacion` con la respuesta del backend
@@ -228,10 +231,19 @@ export function Natacion() {
         setActive(null)
     }
 
+    // Mostrar iconos de edicion
+
+    
+    // Funcion para que se muestra la opcion de agregar más rutinas
     const [addNewRoutine, setAddNewRoutine] = useState<number | null>(null);
+    const [handleButton, setHandleButton] = useState<number | null>(null)
 
     const handleAddRoutine = (id: number) => {
         setAddNewRoutine(addNewRoutine === id ? null : id);
+    }
+
+    const functionButtons = (id:number) => {
+        setHandleButton(handleButton === id ? null : id)
     }
     
     return (
@@ -260,39 +272,41 @@ export function Natacion() {
 
             <div className="list-routine">
             {natacion.map((e, index) => (
-                <div key={index} className="note-card">
+                <div key={index} className="note-card" onClick={() => functionButtons(e._id)}>
 
-                    <div className="buttons">
-                        {editingId === e._id ? (
+                 
+                <div className="buttons">
+                    {editingId === e._id ? (
                         <div className='btn-edit'>
-
                             <button className="check" onMouseEnter={() => open('guardar')} onMouseLeave={close} onClick={() => saveSwin(e._id)}>
-                               <Tooltip title={active === 'guardar' ? "Guardar" : " "}>
+                                <Tooltip title={active === 'guardar' ? "Guardar" : " "}>
                                     <SaveIcon/> 
                                 </Tooltip> 
                             </button>
-
                             <button className="cancel" onClick={cancelEdit} onMouseEnter={() => open('cancelar')} onMouseLeave={close}>
                                 <Tooltip title={active === 'cancelar' ? "Cancelar" : " "}>
                                     <CancelIcon/> 
                                 </Tooltip>
-                            
-                                </button>
+                            </button>
                         </div>
-                            ) : (
+                    ) : (
+                        handleButton === e._id && (
+                            <>
                                 <button className="edit" onClick={() => editSwin(e)} onMouseEnter={() => open('editar')} onMouseLeave={close}>
                                     <Tooltip title={active === 'editar' ? "Editar" : " "}>
                                         <CreateIcon/> 
                                     </Tooltip>
                                 </button>
-                            )}
-
-                        <button onClick={() => deleteSwin(e._id)} onMouseEnter={() => open('eliminar')} onMouseLeave={close} className='delete'> 
-                            <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
-                                <DeleteIcon/> 
-                            </Tooltip>
-                        </button>
-                    </div>
+                                <button onClick={() => deleteSwin(e._id)} onMouseEnter={() => open('eliminar')} onMouseLeave={close} className='delete'> 
+                                    <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
+                                        <DeleteIcon/> 
+                                    </Tooltip>
+                                </button>
+                            </>
+                        )
+                    )}
+                </div>
+                
                    
                    <div className="container-routine">
 
@@ -317,8 +331,10 @@ export function Natacion() {
                                     value={newRoutine[e._id] || ""} 
                                     onChange={(event) => setNewRoutine({ ...newRoutine, [e._id]: event.target.value })} 
                                 />
-                                <button onClick={() => addRoutine(e._id)} className='routine-plus'> 
-                                    <AddIcon/> 
+                                <button onClick={() => addRoutine(e._id)} className='routine-plus' onMouseEnter={() => open('agregar rutina')} onMouseLeave={close}> 
+                                    <Tooltip title={active === 'agregar rutina' ? "Agregar Rutina" : " "}>
+                                        <AddIcon/> 
+                                    </Tooltip>
                                 </button>
                             </div>
                         )}
@@ -346,7 +362,7 @@ export function Natacion() {
                                                 </Tooltip>
                                             </button>
 
-                                            <button onClick={() => deleteRoutines(e._id, i)}  onMouseEnter={() => open('eliminar')} onMouseLeave={close}  className='delete'> 
+                                            <button onClick={() => deleteRoutines(e._id, i)} onMouseEnter={() => open('eliminar')} onMouseLeave={close} className='delete'> 
                                                 <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
                                                     <DeleteIcon/> 
                                                 </Tooltip> 

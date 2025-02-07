@@ -12,8 +12,9 @@ connectDB();
 app.use(express.json());
 
 app.use(cors({
-    origin: 'http://localhost:5173', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+    origin: ['http://localhost:5173', 'https://aplicacion-entrenamiento.onrender.com',], 
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    optionsSuccessStatus: 200
 }));
 
 
