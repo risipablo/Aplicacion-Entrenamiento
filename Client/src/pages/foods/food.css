@@ -1,0 +1,8 @@
+.food-container{
+    flex-direction: column;
+    align-items: center;
+    margin: 6rem auto;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+

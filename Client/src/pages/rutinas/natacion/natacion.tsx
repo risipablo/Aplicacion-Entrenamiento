@@ -19,8 +19,8 @@ interface NatacionList {
     meters: number
 }
 
-const serverFront = 'http://localhost:3001'
-// const serverFront = 'https://aplicacion-entrenamiento.onrender.com'
+// const serverFront = 'http://localhost:3001'
+const serverFront = 'https://aplicacion-entrenamiento.onrender.com'
 
 export function Natacion() {
 

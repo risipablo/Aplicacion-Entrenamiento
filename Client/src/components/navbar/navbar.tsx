@@ -70,7 +70,7 @@ export function Navbar(){
                             <DescriptionIcon/> <a className="active">Notas</a>
                         </NavLink>
 
-                        <NavLink to="/dieta">
+                        <NavLink to="/food">
                             <LocalDiningIcon/> <a className="active">Dieta</a>
                         </NavLink>
 

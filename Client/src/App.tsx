@@ -4,6 +4,7 @@ import { Navbar } from './components/navbar/navbar'
 import './index.css'
 import Home from './pages/home/home'
 import { Natacion } from './pages/rutinas/natacion/natacion'
+import { Food } from './pages/foods/food'
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home/>}/>
           <Route path="/natacion" element={<Natacion/>} />
+          <Route path="/food" element={<Food />} />
         </Routes>
     </BrowserRouter>
       

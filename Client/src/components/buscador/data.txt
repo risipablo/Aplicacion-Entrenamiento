@@ -1,10 +1,3 @@
-
-import  { useState } from "react";
-import { ClipLoader } from "react-spinners"; 
-import { foodNutrition } from "../data/dataFood";
-import SearchIcon from '@mui/icons-material/Search';
-import './buscador.css'
-
 export function BuscadorAlimentos() {
     const [nutrition, setNutrition] = useState<any>(null);
     const [food, setFood] = useState("");
@@ -41,14 +34,14 @@ export function BuscadorAlimentos() {
                     onChange={(e) => setFood(e.target.value)}
                 />
                 <button className="buscador-button" onClick={fetchAlimentos}>
-                    <SearchIcon/>
+                    🔍
                 </button>
             </div>
 
-            
+            {/* Loader mientras se carga */}
             {loading && <ClipLoader size={35} color="#ffcc00" className="loader" />}
 
-            
+            {/* Muestra el contenedor solo si hay resultados */}
             {nutrition && nutrition.foods.length > 0 && (
                 <div className="alimentos-container">
                     <h3>Resultados para: {food}</h3>

@@ -8,7 +8,7 @@
 .list-baners {
     display: flex;
     flex-direction: row;
-    gap: 40px;
+    gap: 50px;
 }
 
 .baner {

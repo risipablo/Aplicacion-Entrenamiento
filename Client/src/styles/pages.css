@@ -6,7 +6,7 @@
     box-sizing: border-box;
 }
 
-h2{
+.pages-container h2{
     margin: 2rem 1rem;
     font-size: 1.8rem;
 }
