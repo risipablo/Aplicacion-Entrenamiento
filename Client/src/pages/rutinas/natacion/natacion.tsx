@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import '../../../styles/pages.css';
-import axios from 'axios';
-
 import DeleteIcon from '@mui/icons-material/Delete';
 import CreateIcon from '@mui/icons-material/Create';
 import SaveIcon from '@mui/icons-material/Save';
@@ -9,28 +7,27 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import { Tooltip } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { useNatacion } from '../../../components/hooks/useNatacion';
+import { NatacionList } from '../../../components/interface/interfaceSwin';
 
-interface NatacionList {
-    _id: number,
-    day: string,
-    title: string,
-    routine: string[],
-    piletas: number,
-    meters: number
-}
 
-// const serverFront = 'http://localhost:3001'
-const serverFront = 'https://aplicacion-entrenamiento.onrender.com'
 
 export function Natacion() {
 
-    const [natacion, setNatacion] = useState<NatacionList[]>([])
+    const {
+        natacion,
+        error,
+        handleAddSwin,
+        handleDeleteSwin,
+        handleUpdateSwin,
+        handleAddRoutine,
+    } = useNatacion();
+
     const [day, setDay] = useState<string>("")
     const [title, setTitle] = useState<string>("")
     const [routine, setRoutine] = useState<string>("")
     const [piletas, setPiletas] = useState<string>("")
     const [meters, setMeters] = useState<string>("")
-    const [error, setError] = useState<string | null>(null);
     const [newRoutine, setNewRoutine] = useState<{ [key: number]: string }>({});
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editingData, setEditingData] = useState({
@@ -45,67 +42,47 @@ export function Natacion() {
     const [editingRoutineIndex,setEditingRoutineIndex] = useState<number | null>(null)
     const [editingRoutineValue,setEditingRoutineValue] = useState<string>("")
 
-    useEffect(() => {
-        axios.get(`${serverFront}/api/swin`)
-            .then(response => {
-                setNatacion(response.data)
-            })
-            .catch(err => setError(err.message))
-    }, [])
-
     const addSwin = () => {
         if (day.trim() && title.trim() && routine.trim() && piletas.trim() && meters.trim() !== "") {
-            axios.post(`${serverFront}/api/add-swin`, {
-                day: day,
-                title: title,
+            handleAddSwin({
+                day,
+                title,
                 routine: [routine],
                 piletas: Number(piletas),
-                meters: Number(meters)
-            })
-                .then(response => {
-                    const swinData = response.data;
-                    setNatacion(natacion => [...natacion, swinData])
-                    setDay("");
-                    setTitle("");
-                    setRoutine("")
-                    setMeters("");
-                    setPiletas("")
-                })
-                .catch(err => setError(err.message))
+                meters: Number(meters),
+            });
+            setDay("");
+            setTitle("");
+            setRoutine("");
+            setPiletas("");
+            setMeters("");
         }
-    }
+    };
+
 
     const deleteSwin = (id: number) => {
-        axios.delete(`${serverFront}/api/swin/${id}`)
-            .then(() => {
-                const updatedNatacion = natacion.filter((natacio) => natacio._id !== id)
-                setNatacion(updatedNatacion)
-            })
-            .catch(err => console.log(err))
-    }
+        handleDeleteSwin(id);
+    };
 
-    const editSwin = (swin: NatacionList) => {
-        setEditingId(swin._id)
+    const editSwin = (swin:NatacionList ) => {
+        setEditingId(swin._id);
         setEditingData({
             day: swin.day,
             title: swin.title,
             piletas: String(swin.piletas),
             meters: String(swin.meters),
             routine: swin.routine,
-        })
-    }
+        });
+    };
+
 
     const saveSwin = (id: number) => {
-        axios.patch(`${serverFront}/api/swin/${id}`, {
-            ...editingData, // Envía todos los campos
+        handleUpdateSwin(id, {
+            ...editingData,
             piletas: Number(editingData.piletas),
             meters: Number(editingData.meters),
-        })
-        .then(response => {
-            setNatacion(natacion.map(swin => swin._id === id ? response.data : swin));
-            cancelEdit();
-        })
-        .catch(err => console.log(err));
+        });
+        setEditingId(null);
     };
 
 
@@ -135,18 +112,10 @@ export function Natacion() {
 
     // Agregar rutinas internas
     const addRoutine = (id: number) => {
-        // Primero, verifica si la nueva rutina no está vacía.
         const routineToAdd = newRoutine[id];
         if (routineToAdd && routineToAdd.trim() !== "") {
-            axios.put(`${serverFront}/api/swin/${id}/add-routine`, { newRoutine: routineToAdd })
-                .then(response => {
-                    // actualizar el estado
-                    setNatacion(natacion.map(nat => 
-                        nat._id === id ? response.data : nat
-                    ));
-                    setNewRoutine({ ...newRoutine, [id]: "" }); // Limpia el input después de agregar
-                })
-                .catch(err => setError(err.message));
+            handleAddRoutine(id, routineToAdd);
+            setNewRoutine({ ...newRoutine, [id]: "" });
         }
     };
 
@@ -159,55 +128,43 @@ export function Natacion() {
     
     const saveEditedRoutine = (id: number) => {
         if (editingRoutineIndex !== null) {
-            const updatedRoutines = [...editingData.routine];
-            updatedRoutines[editingRoutineIndex] = editingRoutineValue; // Actualiza la rutina editada
-    
-          
-            const updatedData = {
-                ...editingData,
-                routine: updatedRoutines,
-            };
-            setEditingData(updatedData);
-    
-            // Envía la actualización al backend
-            axios.patch(`${serverFront}/api/swin/${id}`, {})
-            .then(response => {
-                setNatacion(natacion.map(swin => swin._id === id ? response.data : swin));
-                cancelEditingRoutine(); // Cancela la edición después de guardar
-            })
-            .catch(err => console.log(err));
+            // Obtén el elemento que se está editando
+            const swinToUpdate = natacion.find(swin => swin._id === id);
+            
+            if (swinToUpdate) {
+                // Crea una copia de las rutinas existentes
+                const updatedRoutines = [...swinToUpdate.routine];
+                
+                // Actulizar la rutina que se está editando en la copa 
+                updatedRoutines[editingRoutineIndex] = editingRoutineValue;
+                
+                // llama a las rutinas acutales
+                handleUpdateSwin(id, {
+                    routine: updatedRoutines, // Solo actualizar el campo de rutinas
+                });
+                
+                // Cancela la edición
+                cancelEditingRoutine();
+            }
         }
     };
+    // const deleteRoutines = (id: number, routineIndex: number) => {
+    //     if (editingData.routine.length === 0) {
+    //         console.log("No hay rutinas para eliminar.");
+    //         return;
+    //     }
 
-    const deleteRoutines = (id: number, routineIndex: number) => {
-        // Verifica si hay rutinas para eliminar
-        if (editingData.routine.length === 0) {
-            console.log("No hay rutinas para eliminar.");
-            return;
-        }
-    
-        // Crea una copia de las rutinas y elimina la rutina en el índice especificado
-        const updatedRoutines = [...editingData.routine];
-        updatedRoutines.splice(routineIndex, 1);
-    
-        // Actualiza el estado de edición
-        const updatedData = {
-            ...editingData,
-            routine: updatedRoutines,
-        };
-        setEditingData(updatedData);
-    
-        // Envía la actualización al backend
-        axios.patch(`${serverFront}/api/swin/${id}`, {
-            routine: updatedRoutines, // Envía solo la rutina actualizada
-        })
-        .then(response => {
-            // Actualiza el estado `natacion` con la respuesta del backend
-            setNatacion(natacion.map(swin => swin._id === id ? response.data : swin));
-        })
-        .catch(err => console.log(err));
-    };
+    //     const updatedRoutines = [...editingData.routine];
+    //     updatedRoutines.splice(routineIndex, 1);
 
+    //     const updatedData = {
+    //         ...editingData,
+    //         routine: updatedRoutines,
+    //     };
+    //     setEditingData(updatedData);
+
+    //     handleUpdateSwin(id, updatedData);
+    // };
 
     const cancelEditingRoutine = () => {
         setEditingRoutineIndex(null)
@@ -238,9 +195,10 @@ export function Natacion() {
     const [addNewRoutine, setAddNewRoutine] = useState<number | null>(null);
     const [handleButton, setHandleButton] = useState<number | null>(null)
 
-    const handleAddRoutine = (id: number) => {
+    const handleAddRoutineToggle = (id: number) => {
         setAddNewRoutine(addNewRoutine === id ? null : id);
     }
+
 
     const functionButtons = (id:number) => {
         setHandleButton(handleButton === id ? null : id)
@@ -271,123 +229,120 @@ export function Natacion() {
             {error && <div className="error">{error}</div>}
 
             <div className="list-routine">
-            {natacion.map((e, index) => (
-                <div key={index} className="note-card" onClick={() => functionButtons(e._id)}>
+                {natacion.map((e, index) => (
+                    <div key={index} className="note-card" onClick={() => functionButtons(e._id)}>
 
-                 
-                <div className="buttons">
-                    {editingId === e._id ? (
-                        <div className='btn-edit'>
-                            <button className="check" onMouseEnter={() => open('guardar')} onMouseLeave={close} onClick={() => saveSwin(e._id)}>
-                                <Tooltip title={active === 'guardar' ? "Guardar" : " "}>
-                                    <SaveIcon/> 
-                                </Tooltip> 
-                            </button>
-                            <button className="cancel" onClick={cancelEdit} onMouseEnter={() => open('cancelar')} onMouseLeave={close}>
-                                <Tooltip title={active === 'cancelar' ? "Cancelar" : " "}>
-                                    <CancelIcon/> 
-                                </Tooltip>
-                            </button>
-                        </div>
-                    ) : (
-                        handleButton === e._id && (
-                            <>
-                                <button className="edit" onClick={() => editSwin(e)} onMouseEnter={() => open('editar')} onMouseLeave={close}>
-                                    <Tooltip title={active === 'editar' ? "Editar" : " "}>
-                                        <CreateIcon/> 
-                                    </Tooltip>
-                                </button>
-                                <button onClick={() => deleteSwin(e._id)} onMouseEnter={() => open('eliminar')} onMouseLeave={close} className='delete'> 
-                                    <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
-                                        <DeleteIcon/> 
-                                    </Tooltip>
-                                </button>
-                            </>
-                        )
-                    )}
-                </div>
-                
-                   
-                   <div className="container-routine">
-
-                        <div className="title">
-                            <h3>Dia {editingId === e._id ? <input value={editingData.day} onChange={(e) => setEditingData({...editingData, day: e.target.value})} /> : e.day}  </h3>
-                            <h4> {editingId === e._id ? <input value={editingData.title} onChange={(e) => setEditingData({...editingData, title: e.target.value})} /> : e.title}</h4>
-                        </div>
-
-                        <div className='routine'>
-
-                        <button className='button-plus' onMouseEnter={() => open('agregar más')} onMouseLeave={close} onClick={() => handleAddRoutine(e._id)}> 
-                            <Tooltip title={active === 'agregar más' ? "Agregar Más" : " "}>
-                                <AddCircleOutlineIcon/> 
-                            </Tooltip>
-                        </button>
-
-                        {addNewRoutine === e._id && (
-                            <div className="new-routine-input">
-                                <input 
-                                    type="text" 
-                                    placeholder='Ingresar nueva rutina' 
-                                    value={newRoutine[e._id] || ""} 
-                                    onChange={(event) => setNewRoutine({ ...newRoutine, [e._id]: event.target.value })} 
-                                />
-                                <button onClick={() => addRoutine(e._id)} className='routine-plus' onMouseEnter={() => open('agregar rutina')} onMouseLeave={close}> 
-                                    <Tooltip title={active === 'agregar rutina' ? "Agregar Rutina" : " "}>
-                                        <AddIcon/> 
-                                    </Tooltip>
-                                </button>
-                            </div>
-                        )}
-
-                            <h4>Rutina</h4>
-                            {e.routine.map((r, i) => (
-                                <div key={i} className='routine-container'>
-                                    {editingRoutineIndex === i ? (
-                                        <div>
-                                            <input
-                                                type="text"
-                                                value={editingRoutineValue}
-                                                onChange={(e) => setEditingRoutineValue(e.target.value)}
-                                            />
-
-                                            <button className="check" onMouseEnter={() => open('guardar')} onMouseLeave={close} onClick={() => saveEditedRoutine(e._id)}>
-                                            <Tooltip title={active === 'guardar' ? "Guardar" : " "}>
-                                                    <SaveIcon/> 
-                                                </Tooltip> 
-                                            </button>
-
-                                            <button className="cancel" onClick={cancelEditingRoutine} onMouseEnter={() => open('cancelar')} onMouseLeave={close} >                     
-                                                <Tooltip title={active === 'cancelar' ? "Cancelar" : " "}>
-                                                    <CancelIcon/> 
-                                                </Tooltip>
-                                            </button>
-
-                                            <button onClick={() => deleteRoutines(e._id, i)} onMouseEnter={() => open('eliminar')} onMouseLeave={close} className='delete'> 
-                                                <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
-                                                    <DeleteIcon/> 
-                                                </Tooltip> 
-                                            </button>
-                                                        
-                                        </div>
-                                    ) : (
-                                        <p onClick={() => editingRoutine(i, r)}>{r}</p>
-                                    )}
+                        <div className="buttons">
+                            {editingId === e._id ? (
+                                <div className='btn-edit'>
+                                    <button className="check" onMouseEnter={() => open('guardar')} onMouseLeave={close} onClick={() => saveSwin(e._id)}>
+                                        <Tooltip title={active === 'guardar' ? "Guardar" : " "}>
+                                            <SaveIcon />
+                                        </Tooltip>
+                                    </button>
+                                    <button className="cancel" onClick={cancelEdit} onMouseEnter={() => open('cancelar')} onMouseLeave={close}>
+                                        <Tooltip title={active === 'cancelar' ? "Cancelar" : " "}>
+                                            <CancelIcon />
+                                        </Tooltip>
+                                    </button>
                                 </div>
-                            ))}
+                            ) : (
+                                handleButton === e._id && (
+                                    <>
+                                        <button className="edit" onClick={() => editSwin(e)} onMouseEnter={() => open('editar')} onMouseLeave={close}>
+                                            <Tooltip title={active === 'editar' ? "Editar" : " "}>
+                                                <CreateIcon />
+                                            </Tooltip>
+                                        </button>
+                                        <button onClick={() => deleteSwin(e._id)} onMouseEnter={() => open('eliminar')} onMouseLeave={close} className='delete'>
+                                            <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
+                                                <DeleteIcon />
+                                            </Tooltip>
+                                        </button>
+                                    </>
+                                )
+                            )}
                         </div>
 
-                        <div className="container-data">
-                            <p>Piletas totales: {editingId === e._id ? <input value={editingData.piletas} onChange={(e) => setEditingData({...editingData, piletas: e.target.value})} /> : e.piletas} </p>
-                            <p>Metros totales: {editingId === e._id ? <input value={editingData.meters} onChange={(e) => setEditingData({...editingData, meters: e.target.value})} /> : e.meters} mts </p>
+                        <div className="container-routine">
 
-                            <p className='km'>Kilometros total: {kmTotal(e.piletas, e.meters)} Km</p>
+                            <div className="title">
+                                <h3>Dia {editingId === e._id ? <input value={editingData.day} onChange={(e) => setEditingData({ ...editingData, day: e.target.value })} /> : e.day}  </h3>
+                                <h4> {editingId === e._id ? <input value={editingData.title} onChange={(e) => setEditingData({ ...editingData, title: e.target.value })} /> : e.title}</h4>
+                            </div>
+
+                            <div className='routine'>
+
+                                <button className='button-plus' onMouseEnter={() => open('agregar más')} onMouseLeave={close} onClick={() => handleAddRoutineToggle(e._id)}>
+                                    <Tooltip title={active === 'agregar más' ? "Agregar Más" : " "}>
+                                        <AddCircleOutlineIcon />
+                                    </Tooltip>
+                                </button>
+
+                                {addNewRoutine === e._id && (
+                                    <div className="new-routine-input">
+                                        <input
+                                            type="text"
+                                            placeholder='Ingresar nueva rutina'
+                                            value={newRoutine[e._id] || ""}
+                                            onChange={(event) => setNewRoutine({ ...newRoutine, [e._id]: event.target.value })}
+                                        />
+                                        <button onClick={() => addRoutine(e._id)} className='routine-plus' onMouseEnter={() => open('agregar rutina')} onMouseLeave={close}>
+                                            <Tooltip title={active === 'agregar rutina' ? "Agregar Rutina" : " "}>
+                                                <AddIcon />
+                                            </Tooltip>
+                                        </button>
+                                    </div>
+                                )}
+
+                                <h4>Rutina</h4>
+                                {e.routine.map((r, i) => (
+                                    <div key={i} className='routine-container'>
+                                        {editingRoutineIndex === i ? (
+                                            <div>
+                                                <input
+                                                    type="text"
+                                                    value={editingRoutineValue}
+                                                    onChange={(e) => setEditingRoutineValue(e.target.value)}
+                                                />
+
+                                                <button className="check" onMouseEnter={() => open('guardar')} onMouseLeave={close} onClick={() => saveEditedRoutine(e._id)}>
+                                                    <Tooltip title={active === 'guardar' ? "Guardar" : " "}>
+                                                        <SaveIcon />
+                                                    </Tooltip>
+                                                </button>
+
+                                                <button className="cancel" onClick={cancelEditingRoutine} onMouseEnter={() => open('cancelar')} onMouseLeave={close}>
+                                                    <Tooltip title={active === 'cancelar' ? "Cancelar" : " "}>
+                                                        <CancelIcon />
+                                                    </Tooltip>
+                                                </button>
+
+                                                {/* <button onClick={() => deleteRoutines(e._id, i)} onMouseEnter={() => open('eliminar')} onMouseLeave={close} className='delete'>
+                                                    <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
+                                                        <DeleteIcon />
+                                                    </Tooltip>
+                                                </button> */}
+
+                                            </div>
+                                        ) : (
+                                            <p onClick={() => editingRoutine(i, r)}>{r}</p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="container-data">
+                                <p>Piletas totales: {editingId === e._id ? <input value={editingData.piletas} onChange={(e) => setEditingData({ ...editingData, piletas: e.target.value })} /> : e.piletas} </p>
+                                <p>Metros totales: {editingId === e._id ? <input value={editingData.meters} onChange={(e) => setEditingData({ ...editingData, meters: e.target.value })} /> : e.meters} mts </p>
+
+                                <p className='km'>Kilometros total: {kmTotal(e.piletas, e.meters)} Km</p>
+                            </div>
+
                         </div>
-                                        
                     </div>
-                </div>
 
-                
-            ))}
+                ))}
             </div>
 
         </div>

@@ -11,11 +11,15 @@ const app = express();
 connectDB();
 app.use(express.json());
 
-app.use(cors({
+
+
+const corsOptions = {
     origin: ['http://localhost:5173', 'https://aplicacion-entrenamiento.onrender.com',], 
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], 
     optionsSuccessStatus: 200
-}));
+};
+
+app.use(cors(corsOptions));
 
 
 
