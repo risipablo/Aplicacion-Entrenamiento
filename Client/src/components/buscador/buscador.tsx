@@ -1,42 +1,69 @@
-
-import  { useState } from "react";
-import { ClipLoader } from "react-spinners"; 
-import { foodNutrition } from "../data/dataFood";
-import SearchIcon from '@mui/icons-material/Search';
+import { useState } from 'react'
 import './buscador.css'
+import SearchIcon from '@mui/icons-material/Search';
+import { foodNutrition } from '../data/dataFood'
+import { ClipLoader } from 'react-spinners';
+import axios from 'axios';
+
 
 export function BuscadorAlimentos() {
-    const [nutrition, setNutrition] = useState<any>(null);
-    const [food, setFood] = useState("");
-    const [loading, setLoading] = useState(false); // Estado para el loader
+    const [nutrition, setNutrition] = useState<any>(null)
+    const [food, setFood] = useState("")
+    const [loading,setLoading] = useState(false)
+    const [translated, setTranslated] = useState<string[]>([])
+
+ 
+    const GOOGLE_API_KEY = 'AIzaSyA62p51Ev60un5dbdKHuxxT2iGm71RgHLE'
+
+    const translateText = async (text:string, targetLanguage:string = 'es-LA') => {
+        try{
+            const response = await axios.post(`https://translation.googleapis.com/language/translate/v2?key=${GOOGLE_API_KEY}`,{
+                q: text,
+                target: targetLanguage,
+            })
+            return response.data.data.translations[0].translatedText
+        } catch (error) {
+            console.error("Error traduciendo texto:", error);
+            return text
+        }
+    }
 
     const fetchAlimentos = async () => {
-        if (!food.trim()) return;
-        setLoading(true);
-        setNutrition(null); // Limpia los resultados anteriores
+        if (!food.trim()) return // no devuelve nada si no hay ningun alimento buscado
+        setLoading(true)
+        setNutrition(null)
+        setTranslated([])
 
         try {
-            const data = await foodNutrition(food);
+            const data = await foodNutrition(food)
             if (data.foods && data.foods.length > 0) {
-                setNutrition(data);
+                setNutrition(data)
+
+                const translations = await Promise.all(
+                    data.foods.map(async (item:any) => {
+                        return await translateText(item.food_name)
+                    })
+                )
+                setTranslated(translations)
             } else {
-                setNutrition(null); // Oculta el contenedor si no hay resultados
+                setNutrition(null)
             }
         } catch (error) {
-            console.error("Error al obtener información nutricional:", error);
-            setNutrition(null); // Asegura que el contenedor no se muestre en caso de error
+            console.error("Error al obtener información de los alimentos")
+            setNutrition(null)
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
-    };
+    }
+
 
     return (
         <div className="buscador-container">
             <div className="buscador-input-container">
-                <input
+                <input 
                     type="text"
-                    placeholder="¿Qué alimento buscas?"
-                    className="buscador-input"
+                    placeholder='¿Qué alimento buscas?'
+                    className='buscador-input'
                     value={food}
                     onChange={(e) => setFood(e.target.value)}
                 />
@@ -45,15 +72,16 @@ export function BuscadorAlimentos() {
                 </button>
             </div>
 
-            
-            {loading && <ClipLoader size={35} color="#ffcc00" className="loader" />}
+            {loading && <ClipLoader size={35} color="#ffcc00" className="loader"/>}
 
-            
             {nutrition && nutrition.foods.length > 0 && (
                 <div className="alimentos-container">
-                    <h3>Resultados para: {food}</h3>
-                    {nutrition.foods.map((item: any, index: number) => (
-                        <div key={index} className="alimento-item">
+                    {nutrition.foods.map((item:any , index:number) => (
+                        <div className="alimento-key" key={index}>
+                            <p>
+                                <strong>Nombre:</strong> {translated[index]} (en inglés: {item.food_name})
+                            </p>
+                            
                             <p><strong>Nombre:</strong> {item.food_name}</p>
                             <p><strong>Calorías:</strong> {item.nf_calories} kcal</p>
                             <p><strong>Proteínas:</strong> {item.nf_protein} g</p>
@@ -64,6 +92,5 @@ export function BuscadorAlimentos() {
                 </div>
             )}
         </div>
-    );
+    )
 }
-

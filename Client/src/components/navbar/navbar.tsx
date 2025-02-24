@@ -16,12 +16,12 @@ import './navbar.css'
 
 export function Navbar(){
 
-    const [open,setOpen] = useState(false);
+    const [isOpen,setOpen] = useState(false);
     const [subMenu,setSubMenu]  = useState(false);
 
     const toggleMenu = () => {
-        setOpen(!open);
-        document.body.classList.toggle('open',!open);
+        setOpen(!isOpen);
+        document.body.classList.toggle('open',!isOpen);
     }
 
     const closeMenu = () => {
@@ -33,14 +33,18 @@ export function Navbar(){
         setSubMenu(!subMenu);
     }
 
+    const closeSubMenu = () => {
+        setSubMenu(false);
+    }
+
     return(
         <nav>
-            <div className={`overlay ${open ? 'open' : ''}`} onClick={closeMenu}></div>
+            <div className={`overlay ${isOpen ? 'open' : ''}`} onClick={closeMenu}></div>
             <div className="container">
 
                 <div className="navbar">
 
-                    <div className={`menu ${open ? 'open' : ''}`}>
+                    <div className={`menu ${isOpen ? 'open' : ''}`}>
                         
                         <NavLink to="/" onClick={closeMenu}>
                            <HomeIcon/> <a className="active"> Inicio </a>  
@@ -52,41 +56,41 @@ export function Navbar(){
 
                        
 
-                        <div className={`sub-menu ${subMenu ? 'open' : ''}`}>
-                            <NavLink to='/natacion' onClick={closeMenu}>
+                        <div className={`sub-menu ${subMenu ? 'open' : ''}`} onClick={closeMenu}>
+                            <NavLink to='/natacion' onClick={closeSubMenu}>
                             <PoolIcon/> <a className="submenu-item"> Natación </a>
                             </NavLink>
 
-                            <NavLink to='/gym' onClick={closeMenu}>
+                            <NavLink to='/gym' onClick={closeSubMenu}>
                                 <FitnessCenterIcon/> <a className="submenu-item"> Gym </a>
                             </NavLink>
 
-                            <NavLink to='/bike' onClick={closeMenu}>
+                            <NavLink to='/bike' onClick={closeSubMenu}>
                                 <DirectionsBikeIcon/> <a className="submenu-item"> Bicicleta </a>
                             </NavLink>
                         </div>
 
-                        <NavLink to="/notas">
+                        <NavLink to="/note" onClick={closeMenu}>
                             <DescriptionIcon/> <a className="active">Notas</a>
                         </NavLink>
 
-                        <NavLink to="/food">
+                        <NavLink to="/food" onClick={closeMenu}>
                             <LocalDiningIcon/> <a className="active">Dieta</a>
                         </NavLink>
 
-                        <NavLink to="/seguimiento">
+                        <NavLink to="/seguimiento" onClick={closeMenu}>
                             <MonitorHeartIcon/> <a className="active">Seguimiento</a>
                         </NavLink>
-
-                        <div className="logout">
-                            <NavLink to="/logout">
+ 
+                        <div className="logout" >
+                            <NavLink to="/logout" onClick={closeMenu}>
                                <LogoutIcon/> <a className="active">Cerrar Sesión</a>
                             </NavLink>
                         </div>
                  
                     </div>
 
-                            <div onClick={toggleMenu} className={`menu-icon ${open ? 'open' : ''}`}>            
+                            <div onClick={toggleMenu} className={`menu-icon ${isOpen ? 'open' : ''}`}>            
                             <span></span>
                             <span></span>
                             <span></span>  

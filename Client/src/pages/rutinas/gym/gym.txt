@@ -1,0 +1,55 @@
+ const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [muscleGroup, setMuscleGroup] = useState<string>("");
+    const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
+    const [selectedExercise, setSelectedExercise] = useState<string>("");
+
+    useEffect(() => {
+        const fetchExercises = async () => {
+            const data = await getExercises();
+            setExercises(data);
+        };
+
+        fetchExercises();
+    }, []);
+
+    useEffect(() => {
+        if (muscleGroup) {
+            const filtered = exercises.filter(exercise =>
+                exercise.primaryMuscle.toLowerCase().includes(muscleGroup.toLowerCase())
+            );
+            setFilteredExercises(filtered);
+        } else {
+            setFilteredExercises([]);
+        }
+    }, [muscleGroup, exercises]);
+
+    return (
+        <div className="page-container">
+            <h2>Ejercicios de Gimnasio</h2>
+            <div className="search-container">
+                <select
+                    value={muscleGroup}
+                    onChange={(e) => setMuscleGroup(e.target.value)}
+                    className="search-select"
+                >
+                    <option value="">Selecciona un grupo muscular</option>
+                    <option value="pectoral">Pectoral</option>
+                    <option value="hombro">Hombro</option>
+                </select>
+                {muscleGroup && (
+                    <select
+                        value={selectedExercise}
+                        onChange={(e) => setSelectedExercise(e.target.value)}
+                        className="exercise-select"
+                    >
+                        <option value="">Selecciona un ejercicio</option>
+                        {filteredExercises.map((exercise) => (
+                            <option key={exercise._id} value={exercise.name}>
+                                {exercise.name}
+                            </option>
+                        ))}
+                    </select>
+                )}
+            </div>
+        </div>
+    );

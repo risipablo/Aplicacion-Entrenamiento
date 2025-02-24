@@ -8,7 +8,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Tooltip } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { useNatacion } from '../../../components/hooks/useNatacion';
-import { NatacionList } from '../../../components/interface/interfaceSwin';
+import { NatacionList } from '../../../components/interface/interfaces';
 
 
 

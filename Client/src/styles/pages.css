@@ -1,4 +1,4 @@
-.pages-container {
+.pages-container, .note-container {
     flex-direction: column;
     align-items: center;
     margin: 6rem auto;
@@ -73,7 +73,33 @@
     padding: 1rem;
 }
 
+.search-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2rem auto;
+}
 
+.search-input {
+    margin-bottom: 20px;
+    padding: 10px;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.exercises-list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.exercise-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    width: 200px;
+}
 
 .note-card {
     background: rgb(252, 250, 250);

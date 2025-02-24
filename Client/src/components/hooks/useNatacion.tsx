@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react"
 import { addRoutine, addSwin, deleteSwin, getNatacion, updateSwin } from '../service/natacionService';
-import { NatacionList } from "../interface/interfaceSwin";
-
-
+import { NatacionList } from "../interface/interfaces";
 
 
 export const useNatacion = () => {
@@ -45,6 +43,7 @@ export const useNatacion = () => {
         }
     }
 
+    //edicion de datos
     const handleUpdateSwin = async (id: number, data: Partial<NatacionList>) => {
         try {
             const updatedSwin = await updateSwin(id, data)

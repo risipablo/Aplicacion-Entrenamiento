@@ -6,7 +6,7 @@ import "./home.css"
 export default function Home(){
     return(
         <div className="container-home">
-            <h2> Actividades</h2>
+            {/* <h2> Actividades</h2> */}
             <Baner/>
             <BuscadorAlimentos />
         </div>
