@@ -36,7 +36,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: max-height 0.3s ease-in-out;
+    margin: 0 1rem;
+    transition: max-height 0.3s ease-in-out, border-bottom 0.3s ease-in-out;
 }
 
 .sub-menu.open {
@@ -47,22 +48,37 @@
     font-family: "Montserrat", sans-serif;
     font-size: 1rem;
     color: #ece9e9;
-    margin: .5rem auto;
-    padding: .7rem;
     text-decoration: none;
     transition: color 0.3s;
+    position: relative;
+    
 }
 
 .submenu-item:hover {
     color: #ffcc00;
 }
 
+.submenu-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: #ffcc00;
+    transition: width 0.3s ease-in-out;
+}
+
+.submenu-item:hover::after {
+    width: 100%;
+}
+
 
 
 @media (min-width: 850px) {
     .menu {
-        width: 30vw;
-        min-height: 92vh;
+        width: 25vw;
+        min-height: 90vh;
     }
 
     /* .overlay {

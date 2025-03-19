@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { RoutineList } from "../interface/interfaces"
-import {  addGym, getGym } from "../service/gymService"
+import {  addGym, deleteGym, getGym } from "../service/gymService"
 
 
 export const useGym = () => {
@@ -33,9 +33,19 @@ export const useGym = () => {
         }
     }
 
+    const handleDeleteGym = async (id:number) => {
+        try{
+            await deleteGym(id)
+            setGym(gym.filter(index => index._id !== id))
+        } catch(error:any){
+            setError(error.message)
+        }
+    }
+
     return {
         gym,
         error,
-        handleAddGym
+        handleAddGym,
+        handleDeleteGym
     }
 }

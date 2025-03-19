@@ -17,9 +17,10 @@ export const getNatacion = async () => {
 export const addSwin = async (data: {
     day: string,
     title: string,
+    piletas: string[],
+    meters: string[],
     routine: string[],
-    piletas: number,
-    meters: number
+
 }) => {
     try {
         const response = await axios.post(`${serverFront}/api/add-swin`, data)
@@ -37,7 +38,7 @@ export const deleteSwin = async (id: number) => {
     }
 }
 
-export const updateSwin = async (id: number, data: Partial<{ day: string, title: string, routine: string[], piletas: number, meters: number }>) => {
+export const updateSwin = async (id: number, data: Partial<{ day: string, title: string, routine: string[], piletas: string[], meters: string[] }>) => {
     try {
         const response = await axios.patch(`${serverFront}/api/swin/${id}`, data);
         return response.data;
@@ -46,11 +47,25 @@ export const updateSwin = async (id: number, data: Partial<{ day: string, title:
     }
 };
 
-export const addRoutine = async (id: number, newRoutine: string) => {
+export const addRoutine = async (id: number, newPiletas: string, newMeters: string, newRoutine: string,) => {
     try {
-        const response = await axios.put(`${serverFront}/api/swin/${id}/add-routine`, { newRoutine })
+        const data = { newPiletas, newMeters, newRoutine };
+        console.log('Sending data:', data);
+        const response = await axios.put(`${serverFront}/api/swin/${id}/add-routine`, data);
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            console.error('Error response:', error.response.data);
+        }
+        throw new Error('Error al agregar una nueva rutina');
+    }
+};
+
+export const deleteRoutine = async (id:number, routineIndex:number) => {
+    try{
+        const response = await axios.delete(`${serverFront}/api/swin/${id}/delete-routine/${routineIndex}`)
         return response.data
     } catch (error) {
-        throw new Error('Error al agregar una nueva rutina')
+        throw new Error('Error al agregar una nueva rutina');
     }
 }

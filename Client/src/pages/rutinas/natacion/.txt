@@ -1,0 +1,11 @@
+
+    const calcularMetros = (swin: NatacionList) => {
+        return swin.meters.reduce((total, meter) => total + parseInt(meter), 0)
+    }
+
+    const calcularSeries = (swin:NatacionList) => {
+        return swin.piletas.reduce((total, serie) => total + parseInt(serie), 0)
+    }
+
+
+Estas funciones deben recibir un objeto de tipo NatacionList (es decir, una rutina individual) y calcular los metros y series solo para esa rutina.

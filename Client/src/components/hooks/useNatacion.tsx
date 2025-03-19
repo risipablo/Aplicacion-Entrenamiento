@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { addRoutine, addSwin, deleteSwin, getNatacion, updateSwin } from '../service/natacionService';
+import { addRoutine, addSwin, deleteRoutine, deleteSwin, getNatacion, updateSwin } from '../service/natacionService';
 import { NatacionList } from "../interface/interfaces";
 
 
@@ -23,8 +23,8 @@ export const useNatacion = () => {
         day: string,
         title: string,
         routine: string[],
-        piletas: number,
-        meters: number
+        piletas: string[],
+        meters: string[]
     }) => {
         try {
             const newSwin = await addSwin(data)
@@ -53,15 +53,34 @@ export const useNatacion = () => {
         }
     }
 
-    const handleAddRoutine = async (id: number, newRoutine: string) => {
+    const handleAddRoutine = async (id: number, newRoutine: string, newMeters: string, newPiletas:string) => {
         try {
-            const updatedSwin = await addRoutine(id, newRoutine)
-            setNatacion(natacion.map(swin => swin._id === id ? updatedSwin : swin))
+            const updatedSwin = await addRoutine(id, newRoutine, newMeters, newPiletas);
+            setNatacion(natacion.map(swin => swin._id === id ? updatedSwin : swin));
         } catch (error: any) {
-            setError(error.message)
+            setError(error.message);
         }
-    }
+    };
 
+    const handleDeleteRoutine = async (id: number, routineIndex: number) => {
+        try {
+            await deleteRoutine(id, routineIndex);
+            setNatacion((prevNatacion) =>
+                prevNatacion.map((swin) =>
+                    swin._id === id
+                        ? {
+                              ...swin,
+                              piletas: swin.piletas.filter((_, index) => index !== routineIndex),
+                              meters: swin.meters.filter((_, index) => index !== routineIndex),
+                              routine: swin.routine.filter((_, index) => index !== routineIndex),
+                          }
+                        : swin
+                )
+            );
+        } catch (error: any) {
+            setError(error.message);
+        }
+    };
     return {
         natacion,
         error,
@@ -69,5 +88,6 @@ export const useNatacion = () => {
         handleDeleteSwin,
         handleUpdateSwin,
         handleAddRoutine,
+        handleDeleteRoutine
     }
 }

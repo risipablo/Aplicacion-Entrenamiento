@@ -1,6 +1,7 @@
 import axios from "axios"
 
 
+
 const serverFront = 'http://localhost:3001'
 // const serverFront = 'https://aplicacion-entrenamiento.onrender.com'
 

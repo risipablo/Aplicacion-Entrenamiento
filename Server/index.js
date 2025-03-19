@@ -16,7 +16,7 @@ app.use(express.json());
 
 
 const corsOptions = {
-    origin: ['http://localhost:5173', 'https://aplicacion-entrenamiento.onrender.com',], 
+    origin: ['http://localhost:5174','http://localhost:5177', 'https://aplicacion-entrenamiento.onrender.com',], 
      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], 
     optionsSuccessStatus: 200
 };

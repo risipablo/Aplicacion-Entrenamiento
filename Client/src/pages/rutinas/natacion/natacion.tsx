@@ -21,6 +21,7 @@ export function Natacion() {
         handleDeleteSwin,
         handleUpdateSwin,
         handleAddRoutine,
+        handleDeleteRoutine
     } = useNatacion();
 
     const [day, setDay] = useState<string>("")
@@ -28,28 +29,28 @@ export function Natacion() {
     const [routine, setRoutine] = useState<string>("")
     const [piletas, setPiletas] = useState<string>("")
     const [meters, setMeters] = useState<string>("")
-    const [newRoutine, setNewRoutine] = useState<{ [key: number]: string }>({});
+    const [newSeries, setNewSeries] = useState<{ [key: string]: string }>({});
+    const [newRoutine, setNewRoutine] = useState<{ [key: string]: string }>({});
+    const [newMeters, setNewMeters] = useState<{ [key: string]: string }>({});
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editingData, setEditingData] = useState({
         day: '',
         title: '',
-        piletas: '',
-        meters: '',
+        piletas: [] as string[],
+        meters: [] as string[],
         routine: [] as string[],
     });
 
-    // edicion de nuevas rutinas
-    const [editingRoutineIndex,setEditingRoutineIndex] = useState<number | null>(null)
-    const [editingRoutineValue,setEditingRoutineValue] = useState<string>("")
+
 
     const addSwin = () => {
         if (day.trim() && title.trim() && routine.trim() && piletas.trim() && meters.trim() !== "") {
             handleAddSwin({
                 day,
                 title,
+                meters: [meters],
                 routine: [routine],
-                piletas: Number(piletas),
-                meters: Number(meters),
+                piletas: [piletas],
             });
             setDay("");
             setTitle("");
@@ -64,13 +65,13 @@ export function Natacion() {
         handleDeleteSwin(id);
     };
 
-    const editSwin = (swin:NatacionList ) => {
+    const editSwin = (swin: NatacionList) => {
         setEditingId(swin._id);
         setEditingData({
             day: swin.day,
             title: swin.title,
-            piletas: String(swin.piletas),
-            meters: String(swin.meters),
+            piletas:  swin.piletas,
+            meters:  swin.meters,
             routine: swin.routine,
         });
     };
@@ -79,8 +80,6 @@ export function Natacion() {
     const saveSwin = (id: number) => {
         handleUpdateSwin(id, {
             ...editingData,
-            piletas: Number(editingData.piletas),
-            meters: Number(editingData.meters),
         });
         setEditingId(null);
     };
@@ -102,81 +101,112 @@ export function Natacion() {
             day: '',
             title: '',
             routine: [],
-            meters: '',
-            piletas: '',
+            meters: [],
+            piletas: [],
         })
-        cancelEditingRoutine()
+        // cancelEditingRoutine()
     }
 
    
+    // edicion de nuevas rutinas
+
+    type EditingState = {
+        routineIndex: number | null;
+        routineValue: string;
+        metersIndex: number | null;
+        metersValue: string;
+        seriesIndex: number | null;
+        seriesValue: string;
+    };
+    
+    const [editingState, setEditingState] = useState<{ [key: number]: EditingState }>({});
 
     // Agregar rutinas internas
     const addRoutine = (id: number) => {
+        const seriesToAdd = newSeries[id]
+        const metersToAdd = newMeters[id];
         const routineToAdd = newRoutine[id];
-        if (routineToAdd && routineToAdd.trim() !== "") {
-            handleAddRoutine(id, routineToAdd);
+       
+        
+        if ( seriesToAdd && seriesToAdd !== "" && metersToAdd && metersToAdd.trim() !== "" &&  routineToAdd && routineToAdd.trim() !== "" ) {
+            handleAddRoutine(id, seriesToAdd, metersToAdd, routineToAdd);
+            setNewSeries({...newSeries, [id]: ""})
+            setNewMeters({ ...newMeters, [id]: "" });
             setNewRoutine({ ...newRoutine, [id]: "" });
+            
         }
     };
 
     // funcion de comenzar editar rutinas internas
-    const editingRoutine = (index: number, value: string) => {
-        setEditingRoutineIndex(index); // Establece el índice de la rutina que se está editando
-        setEditingRoutineValue(value); // Establece el valor temporal de la rutina
+    const editingRoutine = (id: number, index: number, routineValue: string, metersValue: string, seriesValue: string) => {
+        setEditingState({
+            ...editingState,
+            [id]: {
+                routineIndex: index,
+                routineValue,
+                metersIndex: index,
+                metersValue,
+                seriesIndex: index,
+                seriesValue,
+            },
+        });
     };
 
     
     const saveEditedRoutine = (id: number) => {
-        if (editingRoutineIndex !== null) {
-            // Obtén el elemento que se está editando
+        const currentEditing = editingState[id];
+        if (currentEditing && currentEditing.routineIndex !== null && currentEditing.metersIndex !== null && currentEditing.seriesIndex !== null) {
             const swinToUpdate = natacion.find(swin => swin._id === id);
-            
             if (swinToUpdate) {
-                // Crea una copia de las rutinas existentes
                 const updatedRoutines = [...swinToUpdate.routine];
-                
-                // Actulizar la rutina que se está editando en la copa 
-                updatedRoutines[editingRoutineIndex] = editingRoutineValue;
-                
-                // llama a las rutinas acutales
+                const updatedMeters = [...swinToUpdate.meters];
+                const updatedSeries = [...swinToUpdate.piletas];
+    
+                updatedRoutines[currentEditing.routineIndex] = currentEditing.routineValue;
+                updatedMeters[currentEditing.metersIndex] = currentEditing.metersValue;
+                updatedSeries[currentEditing.seriesIndex] = currentEditing.seriesValue;
+    
                 handleUpdateSwin(id, {
-                    routine: updatedRoutines, // Solo actualizar el campo de rutinas
+                    routine: updatedRoutines,
+                    meters: updatedMeters,
+                    piletas: updatedSeries,
                 });
-                
-                // Cancela la edición
-                cancelEditingRoutine();
+    
+                // Limpiar el estado de edición para esta rutina
+                setEditingState({
+                    ...editingState,
+                    [id]: {
+                        routineIndex: null,
+                        routineValue: "",
+                        metersIndex: null,
+                        metersValue: "",
+                        seriesIndex: null,
+                        seriesValue: "",
+                    },
+                });
             }
         }
     };
-    // const deleteRoutines = (id: number, routineIndex: number) => {
-    //     if (editingData.routine.length === 0) {
-    //         console.log("No hay rutinas para eliminar.");
-    //         return;
-    //     }
 
-    //     const updatedRoutines = [...editingData.routine];
-    //     updatedRoutines.splice(routineIndex, 1);
+    const deleteRoutineIndex = (id: number, indexRoutine: number) => {
+        handleDeleteRoutine(id, indexRoutine);
+    };
 
-    //     const updatedData = {
-    //         ...editingData,
-    //         routine: updatedRoutines,
-    //     };
-    //     setEditingData(updatedData);
 
-    //     handleUpdateSwin(id, updatedData);
-    // };
-
-    const cancelEditingRoutine = () => {
-        setEditingRoutineIndex(null)
-        setEditingRoutineValue("")
-    }
-
-    const kmTotal = (piletas:number, meters:number ) => {
-        const piletasTotal = Number(piletas);
-        const metersTotal = Number(meters);
-
-        return piletasTotal * metersTotal;
-    }
+    const cancelEditingRoutine = (id: number) => {
+        setEditingState({
+            ...editingState,
+            [id]: {
+                routineIndex: null,
+                routineValue: "",
+                metersIndex: null,
+                metersValue: "",
+                seriesIndex: null,
+                seriesValue: "",
+            },
+        });
+    };
+    
 
     const [active,setActive] = useState<string | null>(null);
 
@@ -204,6 +234,26 @@ export function Natacion() {
         setHandleButton(handleButton === id ? null : id)
     }
     
+
+    const calcularMetros = (swin: NatacionList) => {
+        return swin.meters.reduce((total, meter) => total + parseInt(meter), 0)
+    }
+
+    const calcularSeries = (swin:NatacionList) => {
+        return swin.piletas.reduce((total, serie) => total + parseInt(serie), 0)
+    }
+
+
+    const metrosTotales = (swin:NatacionList) => {
+        return calcularMetros(swin) * calcularSeries(swin)
+    }
+
+    const piletasTotales = (swin:NatacionList) => {
+        const total = metrosTotales(swin) / 34
+
+        return Math.ceil(total)
+    }
+
     return (
         <div className="pages-container">
             <h2> Natación</h2>
@@ -215,10 +265,11 @@ export function Natacion() {
                         <option key={index + 1} value={index + 1}> {index + 1} </option>
                     ))}
                 </select>
+                
                 <input type="text" placeholder='Ingresar Titulo' value={title} onChange={(e) => setTitle(e.target.value)} />
+                <input type="text" placeholder='Ingresar Serie' value={piletas} onChange={(e) => setPiletas(e.target.value)}  />
+                <input type="text" placeholder='Ingresar Metros' value={meters} onChange={(e) => setMeters(e.target.value)} />
                 <input type="text" placeholder='Ingresar Rutina' value={routine} onChange={(e) => setRoutine(e.target.value)} />
-                <input type="number" placeholder='Ingresar Piletas Totales' value={piletas} onChange={(e) => setPiletas(e.target.value)} />
-                <input type="number" placeholder='Ingresar Metros Totales' value={meters} onChange={(e) => setMeters(e.target.value)} />
             </div>
 
             <div className="boton-inputs">
@@ -281,62 +332,121 @@ export function Natacion() {
 
                                 {addNewRoutine === e._id && (
                                     <div className="new-routine-input">
+
+
+
                                         <input
                                             type="text"
-                                            placeholder='Ingresar nueva rutina'
+                                            placeholder='Ingresar Series'
+                                            value={newSeries[e._id] || ""}
+                                            onChange={(event) => setNewSeries({ ...newSeries, [e._id]: event.target.value })}
+                                        />
+
+                                        <input
+                                            type="text"
+                                            placeholder='Ingresar Metros'
+                                            value={newMeters[e._id] || ""}
+                                            onChange={(event) => setNewMeters({ ...newMeters, [e._id]: event.target.value })}
+                                        />
+
+
+                                        <input
+                                            type="text"
+                                            placeholder='Ingresar Nuevo Ejercicio'
                                             value={newRoutine[e._id] || ""}
                                             onChange={(event) => setNewRoutine({ ...newRoutine, [e._id]: event.target.value })}
                                         />
+
+                                        
+                                        
                                         <button onClick={() => addRoutine(e._id)} className='routine-plus' onMouseEnter={() => open('agregar rutina')} onMouseLeave={close}>
                                             <Tooltip title={active === 'agregar rutina' ? "Agregar Rutina" : " "}>
                                                 <AddIcon />
                                             </Tooltip>
                                         </button>
+
                                     </div>
+
                                 )}
 
+                                {/* Edicion de rutinas */}
                                 <h4>Rutina</h4>
                                 {e.routine.map((r, i) => (
                                     <div key={i} className='routine-container'>
-                                        {editingRoutineIndex === i ? (
+                                        {editingState[e._id]?.routineIndex === i ? (
                                             <div>
                                                 <input
                                                     type="text"
-                                                    value={editingRoutineValue}
-                                                    onChange={(e) => setEditingRoutineValue(e.target.value)}
+                                                    value={editingState[e._id].seriesValue}
+                                                    onChange={(event) =>
+                                                        setEditingState({
+                                                            ...editingState,
+                                                            [e._id]: {
+                                                                ...editingState[e._id],
+                                                                seriesValue: event.target.value,
+                                                            },
+                                                        })
+                                                    }
+                                                    placeholder="Ingresar Serie"
                                                 />
-
-                                                <button className="check" onMouseEnter={() => open('guardar')} onMouseLeave={close} onClick={() => saveEditedRoutine(e._id)}>
-                                                    <Tooltip title={active === 'guardar' ? "Guardar" : " "}>
+                                                <input
+                                                    type="text"
+                                                    value={editingState[e._id].metersValue}
+                                                    onChange={(event) =>
+                                                        setEditingState({
+                                                            ...editingState,
+                                                            [e._id]: {
+                                                                ...editingState[e._id],
+                                                                metersValue: event.target.value,
+                                                            },
+                                                        })
+                                                    }
+                                                    placeholder="Ingresar Metros"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={editingState[e._id].routineValue}
+                                                    onChange={(event) =>
+                                                        setEditingState({
+                                                            ...editingState,
+                                                            [e._id]: {
+                                                                ...editingState[e._id],
+                                                                routineValue: event.target.value,
+                                                            },
+                                                        })
+                                                    }
+                                                    placeholder="Ingresar Rutina"
+                                                />
+                                                <button  className="check" onClick={() => saveEditedRoutine(e._id)}>
+                                                    <Tooltip title="Guardar">
                                                         <SaveIcon />
                                                     </Tooltip>
                                                 </button>
-
-                                                <button className="cancel" onClick={cancelEditingRoutine} onMouseEnter={() => open('cancelar')} onMouseLeave={close}>
-                                                    <Tooltip title={active === 'cancelar' ? "Cancelar" : " "}>
+                                                <button className="cancel"  onClick={() => cancelEditingRoutine(e._id)}>
+                                                    <Tooltip title="Cancelar">
                                                         <CancelIcon />
                                                     </Tooltip>
                                                 </button>
-
-                                                {/* <button onClick={() => deleteRoutines(e._id, i)} onMouseEnter={() => open('eliminar')} onMouseLeave={close} className='delete'>
-                                                    <Tooltip title={active === 'eliminar' ? "Eliminar" : " "}>
+                                                <button className="delete" onClick={() => deleteRoutineIndex(e._id, i)}>
+                                                    <Tooltip title="Eliminar">
                                                         <DeleteIcon />
                                                     </Tooltip>
-                                                </button> */}
-
+                                                </button>
                                             </div>
                                         ) : (
-                                            <p onClick={() => editingRoutine(i, r)}>{r}</p>
+                                            <p onClick={() => editingRoutine(e._id, i, r, e.meters[i], e.piletas[i])}>
+                                                {e.piletas[i]} series X {e.meters[i]} metros de {r}
+                                            </p>
                                         )}
                                     </div>
                                 ))}
                             </div>
 
                             <div className="container-data">
-                                <p>Piletas totales: {editingId === e._id ? <input value={editingData.piletas} onChange={(e) => setEditingData({ ...editingData, piletas: e.target.value })} /> : e.piletas} </p>
-                                <p>Metros totales: {editingId === e._id ? <input value={editingData.meters} onChange={(e) => setEditingData({ ...editingData, meters: e.target.value })} /> : e.meters} mts </p>
-
-                                <p className='km'>Kilometros total: {kmTotal(e.piletas, e.meters)} Km</p>
+                                <h4> Resultados </h4>
+                                <p>Piletas Totales: {piletasTotales(e)} Piletas</p>
+                                <p>Metros Totales: {metrosTotales(e)} Metros</p>
+                                <p>Km Totales: {(metrosTotales(e) / 1000).toFixed(1)}  Km</p>
                             </div>
 
                         </div>

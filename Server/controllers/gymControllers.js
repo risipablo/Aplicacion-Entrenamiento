@@ -10,15 +10,15 @@ exports.getGym = async (req,res) => {
 }
 
 exports.addGym = async (req,res) => {
-    const {title,muscle,series,reps,type} = req.body;
+    const {title,muscle,series,reps} = req.body;
 
-    if (!title || !muscle || !series || !reps || !type) {
+    if (!title || !muscle || !series || !reps) {
         return res.status(400).json({ error: 'Completar los campos' });
     }
 
     try{
         const newGym = new gymModel({
-            title,muscle,series,reps,type
+            title,muscle,series,reps
         });
 
         const result = await newGym.save()
@@ -60,7 +60,7 @@ exports.deleteGym = async (req,res) => {
         if (!gym){
             return res.status(404).json({error: 'datos no encontrado'})
         }
-        res.json(swin);
+        res.json(gym);
     } catch (err) {
         res.status(500).json({error:err.message})
     }

@@ -2,9 +2,10 @@ export interface NatacionList {
     _id: number,
     day: string,
     title: string,
+    piletas: string[], //(series)
+    meters:string[],
     routine: string[],
-    piletas: number,
-    meters: number
+    
 }
 
 export interface Exercise {
@@ -15,6 +16,7 @@ export interface Exercise {
     equipament: string;
 }
 
+// interface de gimnasio
 export interface RoutineList {
     _id: number,
     title:string,
