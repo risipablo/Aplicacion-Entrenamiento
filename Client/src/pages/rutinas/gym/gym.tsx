@@ -3,9 +3,12 @@
 // import { Exercise } from "../../../components/interface/interfaces";
 import { useState } from "react";
 import "../../../styles/pages.css";
-import { useGym } from "../../../components/hooks/useGym";
+import { useGym } from "../../../utils/hooks/useGym";
+import { AddButtonRoutine } from "../../../components/common/addButtonRoutine";
+import { Dialog, DialogContent, DialogActions, DialogTitle, Button, TextField, Tooltip } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import { Tooltip } from "@mui/material";
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 export function Gym() {
     const {
@@ -38,52 +41,87 @@ export function Gym() {
         handleDeleteGym(id)
     }
 
-    const [open, setOpen] = useState(false);
-    const [active, setActive] = useState<string | boolean>(false);
-
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-
-    const openMouse = (icon:any) => {
-        setActive(icon)
+    const resetInputs = () => {
+        setTitle("");
+        setMuscle("");
+        setSeries('');
+        setReps('')
     }
 
-    const closeMouse = () => {
-        setActive(false)
-    }
+    const [open, setOpen] = useState(false); 
+
+    const handleOpen = () => setOpen(true); 
+    const handleClose = () => setOpen(false); 
+
 
     return (
         <div className="gym-container">
-
-         <button className="btn-outlined" onClick={handleOpen} onMouseEnter={() => openMouse('agregar')} onMouseLeave={closeMouse}>
-                <Tooltip title={active === "agregar" ? 'Agregar' : ''}>
-                    <div>
-                        <AddCircleOutlineIcon/>
-                        <span className="text">Agregar nueva rutina</span>
-                    </div>
-                </Tooltip>
-            </button>
+            <AddButtonRoutine onOpen={handleOpen}/>
 
             {open && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h2>Rutina</h2>
-                            <button className="btn-close" onClick={handleClose}>✖</button>
-                        </div>
-
-                        <div className="modal-body">
-                            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título" />
-                            <input type="text" value={muscle} onChange={(e) => setMuscle(e.target.value)} placeholder="Músculo" />
-                            <input type="text" value={series} onChange={(e) => setSeries(e.target.value)} placeholder="Series" />
-                            <input type="text" value={reps} onChange={(e) => setReps(e.target.value)} placeholder="Repeticiones" />
-                            <button onClick={addGym}>Agregar</button>
-                        </div>
-
-
-                    </div>
-
-                </div>
+                <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+                    <DialogTitle>
+                        <Tooltip title="Cerrar">
+                            <Button onClick={handleClose} color="secondary" style={{ position: "absolute", top: 10, right: 15 }}>
+                                <CancelIcon />
+                            </Button>
+                        </Tooltip>
+                    </DialogTitle>
+                    <DialogContent
+                        style={{
+                            padding: "1rem",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "0.8rem",
+                            alignItems: "center"
+                        }}
+                    >
+                        <TextField
+                            sx={{ minWidth: "80%", fontSize: "0.9rem" }}
+                            margin="dense"
+                            label="Título"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            variant="standard"
+                        />
+                        <TextField
+                            sx={{ minWidth: "80%", fontSize: "0.9rem" }}
+                            margin="dense"
+                            label="Series"
+                            value={muscle}
+                            onChange={(e) => setMuscle(e.target.value)}
+                            variant="standard"
+                        />
+                        <TextField
+                            sx={{ minWidth: "80%", fontSize: "0.9rem" }}
+                            margin="dense"
+                            label="Metros"
+                            value={series}
+                            onChange={(e) => setSeries(e.target.value)}
+                            variant="standard"
+                        />
+                        <TextField
+                            sx={{ minWidth: "80%", fontSize: "0.9rem" }}
+                            margin="dense"
+                            label="Rutina"
+                            value={reps}
+                            onChange={(e) => setReps(e.target.value)}
+                            variant="standard"
+                        />
+                    </DialogContent>
+                    <DialogActions style={{ padding: "20px", justifyContent: "center" }}>
+                        <Tooltip title="Agregar nueva rutina">
+                            <Button onClick={addGym} color="primary">
+                                <AddCircleOutlineIcon />
+                            </Button>
+                        </Tooltip>
+                        <Tooltip title="Borrar todos los campos">
+                            <Button onClick={resetInputs} color="primary">
+                                <RemoveCircleIcon />
+                            </Button>
+                        </Tooltip>
+                    </DialogActions>
+                </Dialog>
             )}
 
                 <div className="lista-routine">

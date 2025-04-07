@@ -1,4 +1,4 @@
-.pages-container, .note-container {
+.swin-container, .note-container, .gym-container {
     flex-direction: column;
     align-items: center;
     margin: 6rem auto;
@@ -11,95 +11,18 @@
     font-size: 1.8rem;
 }
 
-.inputs-workout {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    margin: 12px auto;
-    padding: 0 1rem;
-    gap: 18px;
-}
-
-.inputs-workout input,select{
-    flex: 1 1 100%;
-    padding: .8rem;
-    border: 1px solid #9a9898;
-    border-radius: 8px;
-    transition: border-color 0.3s ease;
-}
-
-.boton-inputs{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin: 2.8rem 1rem ;
-}
-
-.add, .clean{
-    padding: 12px;
-    margin-right: 1.8rem;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-
-}
-
-
-.add {
-    background-color: #2ecc71;
-}
-
-.add:hover {
-    background-color: #27ae60;
-}
-
-.clean {
-    background-color: #7a2ecc;
-}
-
-.clean:hover {
-    background-color: #5d1ebc;
-}
-
+/* Cartas de rutinas */
 
 .list-routine {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     align-items: center;
     gap: 18px;
-    margin-top: 1.2rem;
-    padding: 1rem;
+    margin: 1.2rem auto;
+    padding: 1.2rem;
 }
 
-.search-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 2rem auto;
-}
 
-.search-input {
-    margin-bottom: 20px;
-    padding: 10px;
-    width: 100%;
-    max-width: 400px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.exercises-list {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.exercise-item {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin: 10px;
-    width: 200px;
-}
 
 .note-card {
     background: rgb(252, 250, 250);
@@ -119,16 +42,6 @@
     transform: translateY(-1px);
     box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.3);
 }
-
-
-@media (max-width: 450px){
-    .note-card{
-        min-width: 360px;
-    }
-}
-
-
-
 .buttons {
     position: absolute;
     top: 12px;
@@ -184,6 +97,7 @@
     font-size: 1.2rem;
 }
 
+/* Rutina interna */
 .routine-container{
     margin: .3rem auto;
 }
@@ -210,6 +124,8 @@
     background-color: #c4c0c0;
 }
 
+
+/* Contenedor de conteo */
 .container-data{
     margin: 2rem 0;
 }
@@ -255,7 +171,7 @@
 }
 
 .delete {
-    color: red !important;
+    color: rgb(255, 0, 0) !important;
     transition: color 0.3s ease;
     background: none;
     border: none;
@@ -265,103 +181,46 @@
     color: darkred;
 }
 
-.gym-container {
+
+
+
+@media (max-width: 450px){
+    .note-card{
+        min-width: 360px;
+    }
+}
+
+
+/* Input de busqueda */
+.search-container {
+    display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 6rem auto;
-    max-width: 100%;
-    box-sizing: border-box;
+    margin: 2rem auto;
 }
 
-/* Botón de Notificaciones */
-.btn-outlined {
-    border: 1px solid #ccc;
-    padding: 8px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-/* Modal */
-.modal {
-    display: flex;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.search-input {
+    margin-bottom: 20px;
+    padding: 10px;
     width: 100%;
-    max-width: 800px;
-    /* height: 300px; */
-    background: rgb(19, 109, 183);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    padding: 15px;
-    z-index: 1000;
-    flex-direction: column;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-/* Modal - Encabezado */
-.modal-header {
+/* Listado de ejercicios */
+.exercises-list {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
+    flex-wrap: wrap;
 }
 
-.modal-header h2 {
-    margin: 0;
-    font-size: 18px;
-    color: white;
-}
-
-.btn-close {
-    background: white;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-}
-
-/* Modal - Cuerpo */
-.modal-body {
-    padding: 1rem;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.modal-body input {
-    font-size: 1rem;
-    width: 90%;
+.exercise-item {
+    border: 1px solid #ccc;
     padding: 10px;
-    margin: 20px 0;
-    border: none;
-    border-bottom: 1px solid #ccc;
-    border-radius: 0;
-    box-sizing: border-box;
-    outline: none;
+    margin: 10px;
+    width: 200px;
 }
 
-.modal-body input:focus {
-    border-bottom: 2px solid #9b09de;
-  }
-  
-
-.routine-list {
-    color: #ccc;
-}
-
-.modal-body button{
-    width: 50%;
-    padding: 10px;
-    margin: 1rem auto;
-    background-color: #ffffff;
-    color: #060606;
-    border: 1px groove rgba(0, 0, 0, 0.9);
-    border-radius: 18px;
-    cursor: pointer;
-    font-size: 1rem;
-}
 
 /* Input y botón de agregar */
 .input-notas {
@@ -386,6 +245,8 @@
     border-radius: 5px;
 }
 
+
+
 /* Tabla de notas */
 .notas-table {
     width: 100%;
@@ -409,3 +270,116 @@
 .trash {
     color: red;
 }
+
+
+
+/* Estilos para el input de Material-UI */
+
+
+.custom-input .MuiInput-underline:before {
+    border-bottom: 2px solid #ccc; /* Color del borde inferior */
+}
+
+.custom-input .MuiInput-underline:hover:before {
+    border-bottom: 2px solid #8e13d4; /* Color del borde al pasar el mouse */
+}
+
+.custom-input .MuiInput-underline:after {
+    border-bottom: 2px solid #8e13d4; /* Color del borde al enfocar */
+}
+
+
+
+
+
+/* .inputs-workout {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    margin: 12px auto;
+    padding: 0 1rem;
+    gap: 18px;
+}
+
+.inputs-workout input,select{
+    flex: 1 1 100%;
+    padding: .8rem;
+    border: 1px solid #9a9898;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.boton-inputs{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 2.8rem 1rem ;
+}
+
+.add, .clean{
+    padding: 12px;
+    margin-right: 1.8rem;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+}
+
+
+.add {
+    background-color: #2ecc71;
+}
+
+.add:hover {
+    background-color: #27ae60;
+}
+
+.clean {
+    background-color: #7a2ecc;
+}
+
+.clean:hover {
+    background-color: #5d1ebc;
+} */
+
+
+/* Modal - Cuerpo */
+/* .modal-body {
+    padding: 1rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.modal-body input {
+    font-size: 1rem;
+    width: 90%;
+    padding: 10px;
+    margin: 20px 0;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    border-radius: 0;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.modal-body input:focus {
+    border-bottom: 2px solid #9b09de;
+  }
+
+  .modal-body button{
+    width: 50%;
+    padding: 10px;
+    margin: 1rem auto;
+    background-color: #ffffff;
+    color: #060606;
+    border: 1px groove rgba(0, 0, 0, 0.9);
+    border-radius: 18px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+   */

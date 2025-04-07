@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { useNote } from "../../components/hooks/useNote"
-import { NotesList } from "../../components/interface/interfaces"
+import { useNote } from "../../utils/hooks/useNote"
+import { NotesList } from "../../utils/interface/interfaces"
 
 
 

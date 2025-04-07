@@ -58,7 +58,7 @@ export function Navbar(){
 
                         <div className={`sub-menu ${subMenu ? 'open' : ''}`} onClick={closeMenu}>
                             <NavLink to='/natacion' onClick={closeSubMenu}>
-                            <PoolIcon/> <a className="submenu-item"> Natación </a>
+                                <PoolIcon/> <a className="submenu-item"> Natación </a>
                             </NavLink>
 
                             <NavLink to='/gym' onClick={closeSubMenu}>
